@@ -83,7 +83,10 @@ const UserProfileScreen: React.FC = () => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#FFF" />
+          <Image
+            source={require('../assets/icons/ChevronLeft.png')}
+            style={{ width: 24, height: 24, tintColor: '#FFF' }}
+          />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
         <View style={styles.placeholder} />

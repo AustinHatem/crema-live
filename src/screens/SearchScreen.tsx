@@ -63,7 +63,7 @@ const SearchScreen: React.FC = () => {
         <Text style={styles.streamStreamer}>{item.streamer.displayName}</Text>
         <View style={styles.viewerContainer}>
           <Image
-            source={require('../assets/icons/Eye-Outline-80px.png')}
+            source={require('../assets/icons/Eye.png')}
             style={{ width: 12, height: 12, tintColor: '#999' }}
           />
           <Text style={styles.streamViewers}> {item.viewerCount} viewers</Text>

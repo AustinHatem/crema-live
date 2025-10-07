@@ -122,7 +122,7 @@ const LiveScreen: React.FC = () => {
 
             <TouchableOpacity style={styles.controlButton}>
               <Image
-                source={require('../assets/icons/Setting2-Bold-80px.png')}
+                source={require('../assets/icons/Settings.png')}
                 style={{ width: 24, height: 24, tintColor: '#FFF' }}
               />
             </TouchableOpacity>

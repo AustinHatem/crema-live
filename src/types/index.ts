@@ -14,6 +14,7 @@ export interface User {
   birthday?: string;
   email?: string;
   createdAt: Date;
+  followingUserIds?: string[];
 }
 
 export interface Stream {

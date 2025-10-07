@@ -50,7 +50,7 @@ const NotificationsScreen: React.FC = () => {
       case 'mention':
         return <Ionicons name="chatbubble-outline" size={20} color="#FFF" />;
       default:
-        return <Ionicons name="notifications-outline" size={20} color="#FFF" />;
+        return <Ionicons name="notifications" size={20} color="#FFF" />;
     }
   };
 
@@ -96,7 +96,7 @@ const NotificationsScreen: React.FC = () => {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <NotificationIcon size={48} color="#999" style={{ marginBottom: 16 }} />
+            <Ionicons name="notifications" size={48} color="#999" style={{ marginBottom: 16 }} />
             <Text style={styles.emptyText}>No notifications yet</Text>
           </View>
         }

@@ -95,7 +95,10 @@ const StreamViewScreen: React.FC = () => {
         style={styles.closeButton}
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="close" size={28} color="#FFF" />
+        <Image
+          source={require('../assets/icons/X.png')}
+          style={{ width: 20, height: 20, tintColor: '#FFF' }}
+        />
       </TouchableOpacity>
 
       {/* Chat overlay on left side */}
@@ -131,12 +134,12 @@ const StreamViewScreen: React.FC = () => {
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.actionButton}>
             <Image
-              source={require('../assets/icons/Add-Outline-80px.png')}
+              source={require('../assets/icons/Plus.png')}
               style={styles.actionIcon}
             />
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton}>
-            <Ionicons name="share-outline" size={28} color="#FFF" />
+            <Ionicons name="share-outline" size={20} color="#FFF" />
           </TouchableOpacity>
         </View>
       </View>
@@ -163,9 +166,9 @@ const styles = StyleSheet.create({
   chatOverlay: {
     position: 'absolute',
     left: 20,
+    top: 100,
     bottom: 120,
     width: '65%',
-    height: 250,
     borderRadius: 12,
     paddingVertical: 8,
     overflow: 'hidden',
@@ -248,8 +251,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionIcon: {
-    width: 28,
-    height: 28,
+    width: 20,
+    height: 20,
     tintColor: '#FFF',
   },
 });

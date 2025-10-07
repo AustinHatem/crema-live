@@ -1,12 +1,13 @@
 export const fonts = {
-  regular: 'ABCDiatype',
-  bold: 'ABCDiatype-Bold',
-  medium: 'ABCDiatype-Medium',
-  light: 'ABCDiatype-Light',
-  thin: 'ABCDiatype-Thin',
-  heavy: 'ABCDiatype-Heavy',
-  black: 'ABCDiatype-Black',
-  ultra: 'ABCDiatype-Ultra',
+  regular: 'Roobert',
+  bold: 'Roobert-Bold',
+  medium: 'Roobert-SemiBold',
+  light: 'Roobert',  // Fallback to regular
+  heavy: 'Roobert-Bold',  // Fallback to bold
+  // Additional fallbacks
+  thin: 'Roobert',  // Fallback to regular
+  black: 'Roobert-Bold',  // Fallback to bold
+  ultra: 'Roobert-Bold',  // Fallback to bold
 };
 
 export const colors = {

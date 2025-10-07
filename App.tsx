@@ -2,19 +2,15 @@ import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, StyleSheet } from 'react-native';
 import { useFonts } from 'expo-font';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from './src/store/AuthContext';
 import RootNavigator from './src/navigation/RootNavigator';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    'ABCDiatype': require('./src/assets/fonts/ABCDiatype-Regular-Trial.otf'),
-    'ABCDiatype-Bold': require('./src/assets/fonts/ABCDiatype-Bold.otf'),
-    'ABCDiatype-Medium': require('./src/assets/fonts/ABCDiatype-Medium.otf'),
-    'ABCDiatype-Light': require('./src/assets/fonts/ABCDiatype-Light-Trial.otf'),
-    'ABCDiatype-Thin': require('./src/assets/fonts/ABCDiatype-Thin-Trial.otf'),
-    'ABCDiatype-Heavy': require('./src/assets/fonts/ABCDiatype-Heavy-Trial.otf'),
-    'ABCDiatype-Black': require('./src/assets/fonts/ABCDiatype-Black-Trial.otf'),
-    'ABCDiatype-Ultra': require('./src/assets/fonts/ABCDiatype-Ultra-Trial.otf'),
+    'Roobert': require('./src/assets/fonts/Roobert-Regular.ttf'),
+    'Roobert-Bold': require('./src/assets/fonts/Roobert-Bold.ttf'),
+    'Roobert-SemiBold': require('./src/assets/fonts/Roobert-SemiBold.ttf'),
   });
 
   if (!fontsLoaded) {
@@ -26,10 +22,12 @@ export default function App() {
   }
 
   return (
-    <AuthProvider>
-      <StatusBar style="light" />
-      <RootNavigator />
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <StatusBar style="light" />
+        <RootNavigator />
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }
 

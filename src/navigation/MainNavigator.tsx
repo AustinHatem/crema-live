@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { View, Image } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as Haptics from "expo-haptics";
@@ -10,20 +10,30 @@ import SearchScreen from "../screens/SearchScreen";
 import LiveScreen from "../screens/LiveScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import StartStreamBottomSheet, { StartStreamBottomSheetRef } from "../components/StartStreamBottomSheet";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const MainNavigator: React.FC = () => {
+  const startStreamSheetRef = useRef<StartStreamBottomSheetRef>(null);
+
+  const handleCreateStream = (e: any) => {
+    e.preventDefault();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    startStreamSheetRef.current?.present();
+  };
+
   return (
+    <View style={{ flex: 1 }}>
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
           backgroundColor: "#000",
           borderTopColor: "#1a1a1a",
-          paddingBottom: 5,
-          paddingTop: 2,
-          height: 85,
+          paddingBottom: 10,
+          paddingTop: 6,
+          height: 95,
           position: "absolute",
           bottom: 0,
           left: 0,
@@ -33,11 +43,14 @@ const MainNavigator: React.FC = () => {
         tabBarActiveTintColor: "#FFF",
         tabBarInactiveTintColor: "rgba(255, 255, 255, 0.5)",
         tabBarLabelStyle: {
-          display: 'none',
+          fontSize: 11,
+          fontFamily: fonts.medium,
+          marginTop: 2,
         },
         tabBarItemStyle: {
-          paddingTop: 5,
-          paddingBottom: 10,
+          paddingTop: 0,
+          paddingBottom: 4,
+          paddingHorizontal: 4,
         },
       }}
     >
@@ -46,10 +59,9 @@ const MainNavigator: React.FC = () => {
         component={FeedScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Image
-              source={require('../assets/icons/Home2-Bold-80px.png')}
-              style={{ width: size, height: size, tintColor: color }}
-            />
+            <View style={{ width: 24, height: 24, justifyContent: "center", alignItems: "center" }}>
+              <Image source={require("../assets/icons/Home.png")} style={{ width: 20, height: 20, tintColor: color }} resizeMode="contain" />
+            </View>
           ),
         }}
         listeners={{
@@ -63,10 +75,9 @@ const MainNavigator: React.FC = () => {
         component={SearchScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Image
-              source={require('../assets/icons/SearchNormal1-Outline-80px.png')}
-              style={{ width: size, height: size, tintColor: color }}
-            />
+            <View style={{ width: 24, height: 24, justifyContent: "center", alignItems: "center" }}>
+              <Image source={require("../assets/icons/Search.png")} style={{ width: 20, height: 20, tintColor: color }} resizeMode="contain" />
+            </View>
           ),
         }}
         listeners={{
@@ -79,17 +90,18 @@ const MainNavigator: React.FC = () => {
         name="Live"
         component={LiveScreen}
         options={{
+          tabBarLabel: () => null,
           tabBarIcon: ({ color, focused }) => (
             <View
               style={{
                 width: 50,
                 height: 50,
                 borderRadius: 25,
-                backgroundColor: focused ? colors.primary : "#333",
+                backgroundColor: focused ? colors.primary : "#2A292E",
                 justifyContent: "center",
                 alignItems: "center",
-                marginTop: -5,
-                marginBottom: 5,
+                marginTop: 15,
+                marginBottom: 0,
                 shadowColor: colors.primary,
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: focused ? 0.25 : 0,
@@ -97,17 +109,12 @@ const MainNavigator: React.FC = () => {
                 elevation: focused ? 5 : 0,
               }}
             >
-              <Image
-                source={require('../assets/icons/Add-Outline-80px.png')}
-                style={{ width: 28, height: 28, tintColor: '#FFF' }}
-              />
+              <Image source={require("../assets/icons/Plus.png")} style={{ width: 20, height: 20, tintColor: "#FFF" }} resizeMode="contain" />
             </View>
           ),
         }}
         listeners={{
-          tabPress: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          },
+          tabPress: handleCreateStream,
         }}
       />
       <Tab.Screen
@@ -115,10 +122,9 @@ const MainNavigator: React.FC = () => {
         component={NotificationsScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Image
-              source={require('../assets/icons/Notification-Bold-80px.png')}
-              style={{ width: size, height: size, tintColor: color }}
-            />
+            <View style={{ width: 24, height: 24, justifyContent: "center", alignItems: "center" }}>
+              <Image source={require("../assets/icons/Inbox.png")} style={{ width: 20, height: 20, tintColor: color }} resizeMode="contain" />
+            </View>
           ),
         }}
         listeners={{
@@ -132,10 +138,9 @@ const MainNavigator: React.FC = () => {
         component={ProfileScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Image
-              source={require('../assets/icons/Profile-Bold-80px.png')}
-              style={{ width: size, height: size, tintColor: color }}
-            />
+            <View style={{ width: 24, height: 24, justifyContent: "center", alignItems: "center" }}>
+              <Image source={require("../assets/icons/User.png")} style={{ width: 20, height: 20, tintColor: color }} resizeMode="contain" />
+            </View>
           ),
         }}
         listeners={{
@@ -145,6 +150,8 @@ const MainNavigator: React.FC = () => {
         }}
       />
     </Tab.Navigator>
+    <StartStreamBottomSheet ref={startStreamSheetRef} />
+    </View>
   );
 };
 

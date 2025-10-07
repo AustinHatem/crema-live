@@ -179,7 +179,10 @@ const SignUpScreen: React.FC = () => {
         {/* Header with navigation */}
         <View style={styles.navigation}>
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Ionicons name="arrow-back" size={24} color="#FFF" />
+            <Image
+              source={require('../assets/icons/ChevronLeft.png')}
+              style={{ width: 24, height: 24, tintColor: '#FFF' }}
+            />
           </TouchableOpacity>
 
           <View style={styles.progressContainer}>

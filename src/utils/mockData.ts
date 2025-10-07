@@ -13,6 +13,7 @@ export const mockCurrentUser: User = {
   following: 234,
   birthday: '1995-05-15',
   createdAt: new Date('2023-01-15'),
+  followingUserIds: ['user-1', 'user-2', 'user-4', 'user-7', 'user-10', 'user-12'],
 };
 
 export const mockUsers: User[] = [
