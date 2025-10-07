@@ -11,7 +11,7 @@ export const fonts = {
 };
 
 export const colors = {
-  primary: '#f73558',
+  primary: '#B0A6DF',
   black: '#000',
   white: '#FFF',
   gray: '#999',
