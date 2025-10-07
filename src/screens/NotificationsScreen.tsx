@@ -4,11 +4,10 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  Image,
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
-import { FontAwesome, MaterialIcons, Ionicons, AntDesign } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { Notification } from '../types';
 import { mockNotifications } from '../utils/mockData';
@@ -39,24 +38,9 @@ const NotificationsScreen: React.FC = () => {
     return `${days}d ago`;
   };
 
-  const getNotificationIcon = (type: Notification['type']) => {
-    switch (type) {
-      case 'follow':
-        return <FontAwesome name="user" size={20} color="#FFF" />;
-      case 'gift':
-        return <AntDesign name="gift" size={20} color="#FFF" />;
-      case 'stream_start':
-        return <MaterialIcons name="play-circle-outline" size={20} color={colors.primary} />;
-      case 'mention':
-        return <Ionicons name="chatbubble-outline" size={20} color="#FFF" />;
-      default:
-        return <Ionicons name="notifications" size={20} color="#FFF" />;
-    }
-  };
-
   const renderNotification = ({ item }: { item: Notification }) => (
     <TouchableOpacity
-      style={[styles.notificationItem, !item.read && styles.unread]}
+      style={[styles.notificationItem, !item.read && styles.unread, item.read && styles.read]}
       onPress={() => {
         markAsRead(item.id);
         if (item.userId) {
@@ -64,9 +48,6 @@ const NotificationsScreen: React.FC = () => {
         }
       }}
     >
-      <View style={styles.iconContainer}>
-        {getNotificationIcon(item.type)}
-      </View>
       <View style={styles.notificationContent}>
         <Text style={styles.notificationTitle}>{item.title}</Text>
         <Text style={styles.notificationMessage}>{item.message}</Text>
@@ -137,21 +118,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#0a0a0a',
     borderBottomWidth: 1,
-    borderBottomColor: '#1a1a1a',
+    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   unread: {
     backgroundColor: '#1a1a1a',
   },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#2a2a2a',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+  read: {
+    backgroundColor: '#000',
   },
   notificationContent: {
     flex: 1,

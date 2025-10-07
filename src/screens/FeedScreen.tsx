@@ -161,7 +161,15 @@ const FeedScreen: React.FC = () => {
 
       {/* Tab Header */}
       <View style={styles.header}>
-        <TabHeader activeTab={activeTab} onTabPress={handleTabPress} scrollProgress={scrollProgress} />
+        <TabHeader
+          activeTab={activeTab}
+          onTabPress={handleTabPress}
+          scrollProgress={scrollProgress}
+          leftTab="Following"
+          rightTab="Live"
+          leftTabWidth={78}
+          rightTabWidth={32}
+        />
       </View>
 
       {/* Stream Modal */}

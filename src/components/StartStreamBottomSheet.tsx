@@ -4,6 +4,8 @@ import BottomSheet, { BottomSheetView, BottomSheetTextInput } from '@gorhom/bott
 import { fonts, colors } from '../utils/globalStyles';
 import { FirestoreService } from '../services/firestoreService';
 import { useAuth } from '../store/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export interface StartStreamBottomSheetRef {
   present: () => void;
@@ -17,6 +19,7 @@ interface StartStreamBottomSheetProps {
 const StartStreamBottomSheet = forwardRef<StartStreamBottomSheetRef, StartStreamBottomSheetProps>(
   ({ onStreamCreated }, ref) => {
     const bottomSheetRef = useRef<BottomSheet>(null);
+    const insets = useSafeAreaInsets();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [isCreating, setIsCreating] = useState(false);
@@ -95,13 +98,24 @@ const StartStreamBottomSheet = forwardRef<StartStreamBottomSheetRef, StartStream
       <BottomSheet
         ref={bottomSheetRef}
         index={-1}
-        snapPoints={['50%']}
-        enablePanDownToClose={true}
+        snapPoints={['100%']}
+        enablePanDownToClose={false}
+        enableHandlePanningGesture={false}
+        enableContentPanningGesture={false}
         backgroundStyle={styles.bottomSheetBackground}
-        handleIndicatorStyle={styles.handleIndicator}
+        handleIndicatorStyle={{ opacity: 0, height: 0 }}
+        handleHeight={0}
         style={{ zIndex: 1000 }}
       >
-        <BottomSheetView style={styles.contentContainer}>
+        <BottomSheetView style={[styles.contentContainer, { paddingTop: insets.top + 16 }]}>
+          {/* Close Button */}
+          <TouchableOpacity
+            onPress={handleClose}
+            style={styles.closeButton}
+          >
+            <Ionicons name="chevron-down" size={24} color="#FFF" />
+          </TouchableOpacity>
+
           <Text style={styles.title}>Start Stream</Text>
 
           <View style={styles.formContainer}>
@@ -171,7 +185,7 @@ const StartStreamBottomSheet = forwardRef<StartStreamBottomSheetRef, StartStream
 
 const styles = StyleSheet.create({
   bottomSheetBackground: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#000',
   },
   handleIndicator: {
     backgroundColor: '#333',
@@ -180,6 +194,15 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingBottom: 20,
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   title: {
     fontSize: 24,
@@ -200,7 +223,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#2A292E',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -208,7 +231,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: fonts.regular,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   textArea: {
     height: 80,
@@ -234,7 +257,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelButton: {
-    backgroundColor: '#2A292E',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   cancelButtonText: {
     fontSize: 16,

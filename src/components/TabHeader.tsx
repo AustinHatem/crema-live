@@ -3,22 +3,37 @@ import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native
 import { fonts } from '../utils/globalStyles';
 
 interface TabHeaderProps {
-  activeTab: 'Following' | 'Live';
-  onTabPress: (tab: 'Following' | 'Live') => void;
+  activeTab: string;
+  onTabPress: (tab: any) => void;
   scrollProgress: Animated.Value;
+  leftTab?: string;
+  rightTab?: string;
+  leftTabWidth?: number;
+  rightTabWidth?: number;
 }
 
-const TabHeader: React.FC<TabHeaderProps> = ({ activeTab, onTabPress, scrollProgress }) => {
+const TabHeader: React.FC<TabHeaderProps> = ({
+  activeTab,
+  onTabPress,
+  scrollProgress,
+  leftTab = 'Following',
+  rightTab = 'Live',
+  leftTabWidth = 78,
+  rightTabWidth = 32,
+}) => {
   // Text width estimations (approximate) - adjusted for larger font size
-  const followingTextWidth = 78; // "Following" is longer (increased for 18px font)
-  const liveTextWidth = 32; // "Live" is shorter (increased for 18px font)
+  const followingTextWidth = leftTabWidth; // Left tab width
+  const liveTextWidth = rightTabWidth; // Right tab width
 
   // Calculate underline position to align with text start
-  // Following tab start: 20 (container padding) + 4 (tab padding) = 24
-  // Live tab start: 24 + 78 (following text) + 4 (tab padding) + 12 (gap) + 4 (tab padding) = 122
+  // Left tab start: 20 (container padding) + 4 (tab padding) = 24
+  const leftPosition = 24;
+  // Right tab start: 24 + leftTabWidth + 4 (tab padding) + 12 (gap) + 4 (tab padding)
+  const rightPosition = 24 + leftTabWidth + 4 + 12 + 4;
+
   const underlineTranslateX = scrollProgress.interpolate({
     inputRange: [0, 1],
-    outputRange: [24, 122], // Align with text start positions (updated for larger font)
+    outputRange: [leftPosition, rightPosition], // Dynamically calculated positions
     extrapolate: 'clamp',
   });
 
@@ -46,30 +61,30 @@ const TabHeader: React.FC<TabHeaderProps> = ({ activeTab, onTabPress, scrollProg
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.tab}
-        onPress={() => onTabPress('Following')}
+        onPress={() => onTabPress(leftTab)}
       >
         <Animated.Text
           style={[
             styles.tabText,
             { opacity: followingOpacity },
-            activeTab === 'Following' && styles.activeTabText
+            activeTab === leftTab && styles.activeTabText
           ]}
         >
-          Following
+          {leftTab}
         </Animated.Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.tab}
-        onPress={() => onTabPress('Live')}
+        onPress={() => onTabPress(rightTab)}
       >
         <Animated.Text
           style={[
             styles.tabText,
             { opacity: liveOpacity },
-            activeTab === 'Live' && styles.activeTabText
+            activeTab === rightTab && styles.activeTabText
           ]}
         >
-          Live
+          {rightTab}
         </Animated.Text>
       </TouchableOpacity>
 
