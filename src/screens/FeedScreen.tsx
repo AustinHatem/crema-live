@@ -1,29 +1,28 @@
-import React, { useState, useRef, useMemo } from "react";
-import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity, Image, StatusBar, Animated, ScrollView, TextInput } from "react-native";
+import React, { useState, useRef } from "react";
+import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity, Image, StatusBar, Animated, ScrollView, Modal, TextInput } from "react-native";
 import { Stream, ChatMessage } from "../types";
 import { useNavigation } from "@react-navigation/native";
 import { mockStreams, mockCurrentUser, mockChatMessages } from "../utils/mockData";
 import { fonts, colors } from "../utils/globalStyles";
 import TabHeader from "../components/TabHeader";
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const FeedScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<"Following" | "Live">("Live");
   const scrollRef = useRef<ScrollView>(null);
 
-  // Bottom sheet state
-  const bottomSheetRef = useRef<BottomSheet>(null);
+  // Modal state
+  const [modalVisible, setModalVisible] = useState(false);
   const [selectedStream, setSelectedStream] = useState<Stream | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(mockChatMessages);
   const chatFlatListRef = useRef<FlatList>(null);
-  const snapPoints = useMemo(() => ['95%'], []);
 
   // Animated value for tab underline (0 = Following, 1 = Live)
   const scrollX = useRef(new Animated.Value(SCREEN_WIDTH)).current;
@@ -32,9 +31,7 @@ const FeedScreen: React.FC = () => {
   const [streams] = useState<Stream[]>(mockStreams);
 
   // Filter streams based on active tab
-  const followingStreams = streams.filter((stream) =>
-    mockCurrentUser.followingUserIds?.includes(stream.streamer.id)
-  );
+  const followingStreams = streams.filter((stream) => mockCurrentUser.followingUserIds?.includes(stream.streamer.id));
   const liveStreams = streams;
 
   // Create scroll progress for tab underline (0 = Following, 1 = Live)
@@ -52,14 +49,32 @@ const FeedScreen: React.FC = () => {
 
   const handleStreamPress = (stream: Stream) => {
     setSelectedStream(stream);
-    setIsSheetOpen(true);
-    bottomSheetRef.current?.expand();
+    setModalVisible(true);
+  };
+
+  const handleSendMessage = () => {
+    if (!message.trim() || !selectedStream) return;
+
+    const newMessage: ChatMessage = {
+      id: `${Date.now()}`,
+      userId: mockCurrentUser.id,
+      username: mockCurrentUser.username,
+      message: message.trim(),
+      timestamp: new Date(),
+    };
+
+    setChatMessages([...chatMessages, newMessage]);
+    setMessage("");
+
+    setTimeout(() => {
+      chatFlatListRef.current?.scrollToEnd({ animated: true });
+    }, 100);
   };
 
   const renderStream = ({ item }: { item: Stream }) => {
     return (
       <View style={styles.streamContainer}>
-        <TouchableOpacity style={styles.videoPlaceholder} onPress={() => handleStreamPress(item)}>
+        <TouchableOpacity style={styles.videoPlaceholder} onPress={() => handleStreamPress(item)} activeOpacity={1}>
           <Image source={{ uri: `https://picsum.photos/400/800?random=${item.id}` }} style={styles.thumbnail} />
         </TouchableOpacity>
 
@@ -77,10 +92,7 @@ const FeedScreen: React.FC = () => {
                 </View>
               </View>
               <View style={styles.viewerCount}>
-                <Image
-                  source={require('../assets/icons/Eye.png')}
-                  style={{ width: 16, height: 16, tintColor: '#FFF' }}
-                />
+                <Image source={require("../assets/icons/Eye.png")} style={{ width: 16, height: 16, tintColor: "#FFF" }} />
                 <Text style={styles.viewerText}> {item.viewerCount}</Text>
               </View>
             </TouchableOpacity>
@@ -125,26 +137,6 @@ const FeedScreen: React.FC = () => {
     </View>
   );
 
-  const handleSendMessage = () => {
-    if (!message.trim() || !selectedStream) return;
-
-    const newMessage: ChatMessage = {
-      id: `${Date.now()}`,
-      userId: mockCurrentUser.id,
-      username: mockCurrentUser.username,
-      avatar: mockCurrentUser.avatar,
-      text: message.trim(),
-      timestamp: new Date(),
-    };
-
-    setChatMessages([...chatMessages, newMessage]);
-    setMessage('');
-
-    setTimeout(() => {
-      chatFlatListRef.current?.scrollToEnd({ animated: true });
-    }, 100);
-  };
-
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -156,13 +148,10 @@ const FeedScreen: React.FC = () => {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          {
-            useNativeDriver: false,
-            listener: handleScroll,
-          }
-        )}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+          useNativeDriver: false,
+          listener: handleScroll,
+        })}
         onMomentumScrollEnd={handleScroll}
         contentOffset={{ x: SCREEN_WIDTH, y: 0 }}
       >
@@ -175,105 +164,102 @@ const FeedScreen: React.FC = () => {
         <TabHeader activeTab={activeTab} onTabPress={handleTabPress} scrollProgress={scrollProgress} />
       </View>
 
-      {/* Stream View Bottom Sheet */}
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={-1}
-        snapPoints={snapPoints}
-        enablePanDownToClose={true}
-        backgroundStyle={styles.bottomSheetBackground}
-        handleIndicatorStyle={styles.handleIndicator}
-        containerStyle={{ zIndex: 100000, elevation: 100000 }}
-        onChange={(index) => {
-          if (index === -1) {
-            setIsSheetOpen(false);
-          }
-        }}
-      >
-        <BottomSheetView style={styles.sheetContent}>
-          {selectedStream && (
-            <>
-              {/* Stream Background */}
-              <Image
-                source={{ uri: `https://picsum.photos/400/800?random=${selectedStream.id}` }}
-                style={styles.streamBackground}
-              />
+      {/* Stream Modal */}
+      <Modal visible={modalVisible} animationType="slide" onRequestClose={() => setModalVisible(false)}>
+        {selectedStream && (
+          <View style={{ flex: 1, backgroundColor: "#000" }}>
+            {/* Background Image */}
+            <Image
+              source={{ uri: `https://picsum.photos/400/800?random=${selectedStream.id}` }}
+              style={{ position: "absolute", width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+              resizeMode="cover"
+            />
 
-              {/* Header with close button */}
-              <View style={styles.sheetHeader}>
+            {/* Content */}
+            <View style={{ flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom }}>
+              {/* Close Button */}
+              <View style={{ padding: 16 }}>
                 <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => {
-                    setIsSheetOpen(false);
-                    bottomSheetRef.current?.close();
-                  }}
+                  onPress={() => setModalVisible(false)}
+                  style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" }}
                 >
-                  <Ionicons name="chevron-down" size={28} color="#FFF" />
+                  <Ionicons name="chevron-down" size={24} color="#FFF" />
                 </TouchableOpacity>
+
+                {/* Title and View Count */}
+                <View style={{ marginTop: 16, flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                  <View style={{ backgroundColor: "rgba(0,0,0,0.5)", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6 }}>
+                    <Text style={{ color: "#FFF", fontSize: 16, fontFamily: fonts.bold }}>{selectedStream.title}</Text>
+                  </View>
+                  <View style={{ backgroundColor: "rgba(0,0,0,0.5)", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, flexDirection: "row", alignItems: "center" }}>
+                    <Image source={require("../assets/icons/Eye.png")} style={{ width: 16, height: 16, tintColor: "#FFF", marginRight: 4 }} />
+                    <Text style={{ color: "#FFF", fontSize: 14, fontFamily: fonts.medium }}>{selectedStream.viewerCount}</Text>
+                  </View>
+                </View>
               </View>
 
-              {/* Chat overlay */}
-              <View style={styles.chatOverlay}>
+              {/* Chat Messages */}
+              <View style={{ flex: 1, paddingHorizontal: 16, overflow: "hidden" }}>
                 <FlatList
                   ref={chatFlatListRef}
                   data={chatMessages}
                   keyExtractor={(item) => item.id}
                   renderItem={({ item }) => (
-                    <View style={styles.chatMessage}>
-                      <Image source={{ uri: item.avatar }} style={styles.chatAvatar} />
-                      <View style={styles.chatBubble}>
-                        <Text style={styles.chatUsername}>{item.username}</Text>
-                        <Text style={styles.chatText}>{item.text}</Text>
+                    <View style={{ marginBottom: 8 }}>
+                      <View style={{ backgroundColor: "rgba(0,0,0,0.5)", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, alignSelf: "flex-start", maxWidth: "85%" }}>
+                        <Text style={{ color: colors.primary, fontSize: 12, fontFamily: fonts.bold, marginBottom: 4 }}>{item.username}</Text>
+                        <Text style={{ color: "#FFF", fontSize: 14, fontFamily: fonts.regular }}>{item.message}</Text>
                       </View>
                     </View>
                   )}
                   showsVerticalScrollIndicator={false}
-                  contentContainerStyle={styles.chatList}
+                  contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end", paddingBottom: 8 }}
                 />
               </View>
 
-              {/* Stream info footer */}
-              <View style={styles.streamFooter}>
-                <View style={styles.streamInfoBottom}>
-                  <View style={styles.streamerInfoRow}>
-                    <Image source={{ uri: selectedStream.streamer.avatar }} style={styles.bottomAvatar} />
-                    <View>
-                      <Text style={styles.bottomStreamerName}>{selectedStream.streamer.displayName}</Text>
-                      <Text style={styles.bottomStreamTitle}>{selectedStream.title}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.viewerCountBottom}>
-                    <Image
-                      source={require('../assets/icons/Eye.png')}
-                      style={{ width: 16, height: 16, tintColor: '#FFF' }}
+              {/* Bottom Section */}
+              <View style={{ padding: 16 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  {/* Message Input */}
+                  <View style={{ flex: 1, flexDirection: "row", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)", borderRadius: 24, paddingHorizontal: 16, paddingVertical: 10 }}>
+                    <TextInput
+                      style={{ flex: 1, color: "#FFF", fontSize: 14, fontFamily: fonts.regular, paddingVertical: 8 }}
+                      placeholder="Send a message..."
+                      placeholderTextColor="rgba(255,255,255,0.5)"
+                      value={message}
+                      onChangeText={setMessage}
+                      onSubmitEditing={handleSendMessage}
+                      returnKeyType="send"
                     />
-                    <Text style={styles.viewerText}> {selectedStream.viewerCount}</Text>
+                    <TouchableOpacity
+                      style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primary, justifyContent: "center", alignItems: "center", marginLeft: 8 }}
+                      onPress={handleSendMessage}
+                    >
+                      <Image source={require("../assets/icons/ArrowUp.png")} style={{ width: 14, height: 14, tintColor: "#FFF" }} />
+                    </TouchableOpacity>
                   </View>
-                </View>
 
-                {/* Message input */}
-                <View style={styles.messageInputContainer}>
-                  <TextInput
-                    style={styles.messageInput}
-                    placeholder="Send a message..."
-                    placeholderTextColor="rgba(255,255,255,0.5)"
-                    value={message}
-                    onChangeText={setMessage}
-                    onSubmitEditing={handleSendMessage}
-                    returnKeyType="send"
-                  />
+                  {/* Gift Button */}
                   <TouchableOpacity
-                    style={styles.sendButton}
-                    onPress={handleSendMessage}
+                    style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" }}
+                    onPress={() => {}}
                   >
-                    <Ionicons name="send" size={20} color="#FFF" />
+                    <Ionicons name="gift-outline" size={24} color="#FFF" />
+                  </TouchableOpacity>
+
+                  {/* Share Button */}
+                  <TouchableOpacity
+                    style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" }}
+                    onPress={() => {}}
+                  >
+                    <Ionicons name="share-outline" size={24} color="#FFF" />
                   </TouchableOpacity>
                 </View>
               </View>
-            </>
-          )}
-        </BottomSheetView>
-      </BottomSheet>
+            </View>
+          </View>
+        )}
+      </Modal>
     </View>
   );
 };
@@ -392,137 +378,6 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 12,
     fontFamily: fonts.medium,
-  },
-  bottomSheetBackground: {
-    backgroundColor: "#000",
-  },
-  handleIndicator: {
-    backgroundColor: "#333",
-  },
-  sheetContent: {
-    flex: 1,
-  },
-  streamBackground: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-  sheetHeader: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    padding: 20,
-    paddingTop: 10,
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  chatOverlay: {
-    flex: 1,
-    paddingHorizontal: 12,
-    paddingTop: 60,
-  },
-  chatList: {
-    paddingBottom: 20,
-  },
-  chatMessage: {
-    flexDirection: "row",
-    marginBottom: 12,
-    alignItems: "flex-start",
-  },
-  chatAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    marginRight: 8,
-  },
-  chatBubble: {
-    backgroundColor: "rgba(0,0,0,0.6)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-    maxWidth: "75%",
-  },
-  chatUsername: {
-    color: colors.primary,
-    fontSize: 12,
-    fontFamily: fonts.bold,
-    marginBottom: 2,
-  },
-  chatText: {
-    color: "#FFF",
-    fontSize: 14,
-    fontFamily: fonts.regular,
-  },
-  streamFooter: {
-    padding: 16,
-    paddingBottom: 120,
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
-  streamInfoBottom: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  streamerInfoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  bottomAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  bottomStreamerName: {
-    color: "#FFF",
-    fontSize: 14,
-    fontFamily: fonts.bold,
-  },
-  bottomStreamTitle: {
-    color: "#FFF",
-    fontSize: 12,
-    fontFamily: fonts.regular,
-    opacity: 0.8,
-  },
-  viewerCountBottom: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  messageInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(42,41,46,0.9)",
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  messageInput: {
-    flex: 1,
-    color: "#FFF",
-    fontSize: 14,
-    fontFamily: fonts.regular,
-    paddingVertical: 8,
-  },
-  sendButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 8,
   },
 });
 
